@@ -28,16 +28,13 @@ public class QuizService {
         AppUser user = userRepository.findById(1L)
             .orElseThrow(() -> new RuntimeException("User not found"));
             
-        QuizSession session = new QuizSession();
+        var session = new QuizSession();
         session.setUser(user);
         session.setStartTime(LocalDateTime.now());
         session.setActive(true);
-        
         session = sessionRepository.save(session);
         
-        QuizSessionResponse response = new QuizSessionResponse();
-        response.setSessionId(session.getId());
-        response.setMessage("Quiz session started successfully");
+        var response = new QuizSessionResponse(session.getId(), "Quiz session started successfully");
         return response;
     }
     
@@ -49,35 +46,34 @@ public class QuizService {
             throw new RuntimeException("Session is not active");
         }
         
-        Question question = questionRepository.findRandomQuestion();
-        QuestionResponse response = new QuestionResponse();
-        response.setQuestionId(question.getId());
-        response.setQuestionText(question.getQuestionText());
-        response.setOptionA(question.getOptionA());
-        response.setOptionB(question.getOptionB());
-        response.setOptionC(question.getOptionC());
-        response.setOptionD(question.getOptionD());
+        var question = questionRepository.findRandomQuestion();
+        var response = new QuestionResponse(
+            question.getId(),
+            question.getQuestionText(),
+            question.getOptionA(),
+            question.getOptionB(),
+            question.getOptionC(),
+            question.getOptionD());
         return response;
     }
     
     public String submitAnswer(AnswerRequest request) {
-        QuizSession session = sessionRepository.findById(request.getSessionId())
+        QuizSession session = sessionRepository.findById(request.sessionId())
             .orElseThrow(() -> new RuntimeException("Session not found"));
             
         if (!session.isActive()) {
             throw new RuntimeException("Session is not active");
         }
         
-        Question question = questionRepository.findById(request.getQuestionId())
+        var question = questionRepository.findById(request.questionId())
             .orElseThrow(() -> new RuntimeException("Question not found"));
             
-        QuizAnswer answer = new QuizAnswer();
+        var answer = new QuizAnswer();
         answer.setSession(session);
         answer.setQuestion(question);
-        answer.setSubmittedAnswer(request.getAnswer());
-        answer.setCorrect(question.getCorrectOption().equalsIgnoreCase(request.getAnswer()));
+        answer.setSubmittedAnswer(request.answer());
+        answer.setCorrect(question.getCorrectOption().equalsIgnoreCase(request.answer()));
         answer.setSubmissionTime(LocalDateTime.now());
-        
         answerRepository.save(answer);
         
         return answer.isCorrect() ? "Correct answer!" : "Wrong answer!";
@@ -89,20 +85,22 @@ public class QuizService {
             
         List<QuizAnswer> answers = answerRepository.findBySession(session);
         
-        QuizSummary summary = new QuizSummary();
-        summary.setTotalQuestions(answers.size());
-        summary.setCorrectAnswers((int) answers.stream().filter(QuizAnswer::isCorrect).count());
-        summary.setIncorrectAnswers(answers.size() - summary.getCorrectAnswers());
-        
         List<QuizSummary.AnswerDetail> answerDetails = new ArrayList<>();
         for (QuizAnswer answer : answers) {
-            QuizSummary.AnswerDetail detail = new QuizSummary.AnswerDetail();
-            detail.setQuestionText(answer.getQuestion().getQuestionText());
-            detail.setSubmittedAnswer(answer.getSubmittedAnswer());
-            detail.setCorrect(answer.isCorrect());
+            QuizSummary.AnswerDetail detail = new QuizSummary.AnswerDetail(
+                answer.getQuestion().getQuestionText(),
+                answer.getSubmittedAnswer(),
+                answer.isCorrect());
+                
             answerDetails.add(detail);
         }
-        summary.setAnswers(answerDetails);
+
+        int correctAnswers = (int) answers.stream().filter(QuizAnswer::isCorrect).count();
+        QuizSummary summary = new QuizSummary(
+            answers.size(),
+            correctAnswers,
+            answers.size() - correctAnswers,
+            answerDetails);
         
         return summary;
     }

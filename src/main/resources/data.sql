@@ -1,4 +1,4 @@
-INSERT INTO app_user (id, username) VALUES (1, 'john_doe');
+INSERT INTO app_user (id, username) VALUES (1, 'rsmalani');
 
 INSERT INTO question (id, question_text, option_a, option_b, option_c, option_d, correct_option) VALUES
 (1, 'What is the capital of France?', 'London', 'Berlin', 'Paris', 'Madrid', 'C'),

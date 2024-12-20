@@ -1,10 +1,9 @@
 package com.rsm.quiz.dto;
 
-import lombok.Data;
-
-@Data
-public class AnswerRequest {
-    private Long sessionId;
-    private Long questionId;
-    private String answer;
+public record AnswerRequest(
+    Long sessionId,
+    Long questionId,
+    String answer
+) {
+    
 }
