@@ -57,8 +57,8 @@ public class QuizService {
         return response;
     }
     
-    public String submitAnswer(AnswerRequest request) {
-        QuizSession session = sessionRepository.findById(request.sessionId())
+    public String submitAnswer(Long sessionId, AnswerRequest request) {
+        QuizSession session = sessionRepository.findById(sessionId)
             .orElseThrow(() -> new RuntimeException("Session not found"));
             
         if (!session.isActive()) {
@@ -91,9 +91,11 @@ public class QuizService {
                 answer.getQuestion().getQuestionText(),
                 answer.getSubmittedAnswer(),
                 answer.isCorrect());
-                
+
             answerDetails.add(detail);
         }
+
+        sessionRepository.delete(session);
 
         int correctAnswers = (int) answers.stream().filter(QuizAnswer::isCorrect).count();
         QuizSummary summary = new QuizSummary(
@@ -102,6 +104,8 @@ public class QuizService {
             answers.size() - correctAnswers,
             answerDetails);
         
+        answers.forEach(answer -> answerRepository.delete(answer));
+        sessionRepository.delete(session);
         return summary;
     }
 }
