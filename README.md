@@ -31,20 +31,21 @@ A simple REST API-based quiz application built with Spring Boot.
    ```
    POST /api/quiz/start
    
-   Response: { "sessionId": 1, "message": "Quiz session started successfully" }
+   Response: "Quiz session started successfully"
+            HTTP Cookie with sessionID stored in it on path /api/quiz
    ```
 
 2. Get Random Question
    ```
-   GET /api/quiz/question?sessionId=1
+   GET /api/quiz/question
 
    Response: { 
      "questionId": 1,
      "questionText": "Sample question",
-     "optionA": "Option A",
-     "optionB": "Option B",
-     "optionC": "Option C",
-     "optionD": "Option D"
+     "a": "Option A",
+     "b": "Option B",
+     "c": "Option C",
+     "d": "Option D"
    }
    ```
 
@@ -52,7 +53,6 @@ A simple REST API-based quiz application built with Spring Boot.
    ```
    POST /api/quiz/submit
    Request Body: {
-     "sessionId": 1,
      "questionId": 1,
      "answer": "A"
    }
@@ -61,7 +61,7 @@ A simple REST API-based quiz application built with Spring Boot.
 
 4. Summary
     ```
-    GET /api/quiz/summary?sessionId=1
+    GET /api/quiz/summary
 
     Response: {
     "totalQuestions": 5,

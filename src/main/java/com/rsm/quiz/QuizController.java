@@ -18,7 +18,7 @@ public class QuizController {
     private QuizService quizService;
     
     @PostMapping("/start")
-    public ResponseEntity<QuizSessionResponse> startQuiz(HttpServletResponse response) {
+    public ResponseEntity<String> startQuiz(HttpServletResponse response) {
         var quizSessionResponse = quizService.startNewSession();
         // Create a cookie to store the session ID
         Cookie cookie = new Cookie("quizSessionId", quizSessionResponse.sessionId().toString());
@@ -27,7 +27,7 @@ public class QuizController {
         cookie.setMaxAge(3600); // 1 hour expiration (you can adjust)
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(quizSessionResponse);
+        return ResponseEntity.ok(quizSessionResponse.message());
         
     }
     
